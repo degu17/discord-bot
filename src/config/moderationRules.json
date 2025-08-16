@@ -1,0 +1,20 @@
+{
+  "rules": [
+    {
+      "level": 1,
+      "words": ["ばか", "あほ", "うざい"],
+      "action": "warn"
+    },
+    {
+      "level": 2,
+      "words": ["死ね", "殺す", "消えろ"],
+      "action": "delete"
+    },
+    {
+      "level": 3,
+      "words": ["クソ野郎", "ゴミ人間"],
+      "action": "timeout",
+      "timeoutDuration": 600000
+    }
+  ]
+}
