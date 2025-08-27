@@ -1,0 +1,21 @@
+{
+  "project": {
+    "name": "discord-bot"
+  },
+  "team": {
+    "name": "discord-bot-team"
+  },
+  "prodUrl": "https://discord-bot.convex.cloud",
+  "functions": {
+    "codegen": {
+      "enabled": true,
+      "path": "./src/lib/convex"
+    }
+  },
+  "authInfo": [
+    {
+      "domain": "clerk",
+      "applicationID": "convex"
+    }
+  ]
+}

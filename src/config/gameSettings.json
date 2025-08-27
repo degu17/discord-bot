@@ -1,7 +1,0 @@
-{
-  "maxParticipants": 10,
-  "timeoutMinutes": 5,
-  "digitCount": 4,
-  "allowDuplicateDigits": false,
-  "recruitmentTimeMinutes": 2
-}

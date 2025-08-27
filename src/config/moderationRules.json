@@ -16,5 +16,19 @@
       "action": "timeout",
       "timeoutDuration": 600000
     }
+  ],
+  "settings": {
+    "logRotationSize": 10485760,
+    "exemptRoles": [],
+    "exemptChannels": [],
+    "defaultTimeoutDuration": 600000,
+    "administratorNotificationChannel": null
+  },
+  "defaultRules": [
+    {
+      "level": 1,
+      "words": ["spam", "test"],
+      "action": "warn"
+    }
   ]
 }
