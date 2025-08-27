@@ -12,49 +12,15 @@ export * from './task';
 // Discord関連の型定義を再エクスポート
 export * from './discord';
 
-// 共通型定義（複数ドメインで使用される型）
-
-/**
- * モデレーション機能関連の型定義
- * 将来的にmoderation.tsファイルに分離予定
- */
-export interface ModerationRule {
-  /** モデレーションレベル（1: 警告, 2: 削除, 3: タイムアウト） */
-  level: 1 | 2 | 3;
-  /** 検出対象の単語リスト */
-  words: string[];
-  /** 実行するアクション */
-  action: 'warn' | 'delete' | 'timeout';
-  /** タイムアウト時間（分）- アクションがtimeoutの場合のみ */
-  timeoutDuration?: number;
-}
-
-/**
- * モデレーションログを表すインターフェース
- */
-export interface ModerationLog {
-  /** 対象ユーザーID */
-  userId: string;
-  /** 対象メッセージID */
-  messageId: string;
-  /** 対象チャンネルID */
-  channelId: string;
-  /** メッセージ内容 */
-  content: string;
-  /** 発動したルール */
-  triggeredRule: ModerationRule;
-  /** 実行されたアクション */
-  action: string;
-  /** ログ記録時刻 */
-  timestamp: Date;
-}
+// モデレーション関連の型定義を再エクスポート
+export * from './moderation';
 
 /**
  * Bot設定を表すインターフェース
  */
 export interface BotConfig {
   /** モデレーションルール */
-  moderationRules: ModerationRule[];
+  moderationRules: ModerationRules;
   /** ゲーム設定 */
   gameSettings: {
     /** 最大参加者数 */

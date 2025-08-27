@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { IModerationLogger, LogEntry } from '../../../types/moderation';
+import { IModerationLogger, LogEntry } from '../../types/moderation';
 
 /**
  * モデレーション活動のログ記録を担当するクラス

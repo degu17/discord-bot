@@ -17,7 +17,7 @@
     "bot:dev": "ts-node --project tsconfig.bot.json src/index.ts",
     "bot:start": "node dist/index.js",
     "bot:build": "tsc --project tsconfig.bot.json",
-    "register-commands": "ts-node src/scripts/registerCommands.ts",
+    "register-commands": "ts-node --project tsconfig.bot.json src/scripts/registerCommands.ts",
     "type-check": "tsc --noEmit"
   },
   "keywords": [],

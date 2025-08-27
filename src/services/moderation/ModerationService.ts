@@ -5,7 +5,7 @@ import {
   ModerationAction, 
   LogEntry,
   ModerationSettings 
-} from '../../../types/moderation';
+} from '../../types/moderation';
 import { ConfigManager } from '../../utils/ConfigManager';
 import { WordDetector } from './WordDetector';
 import { ActionExecutor } from './ActionExecutor';

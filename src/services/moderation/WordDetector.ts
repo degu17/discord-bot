@@ -1,4 +1,4 @@
-import { IWordDetector, DetectionResult, ModerationRules, ModerationRule, ModerationAction } from '../../../types/moderation';
+import { IWordDetector, DetectionResult, ModerationRules, ModerationRule, ModerationAction } from '../../types/moderation';
 import { ConfigManager } from '../../utils/ConfigManager';
 
 /**

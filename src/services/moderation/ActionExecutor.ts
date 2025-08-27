@@ -1,5 +1,5 @@
 import { Message, TextChannel, GuildMember, PermissionsBitField, Client } from 'discord.js';
-import { IActionExecutor, ActionContext, ModerationAction } from '../../../types/moderation';
+import { IActionExecutor, ActionContext, ModerationAction } from '../../types/moderation';
 
 /**
  * モデレーションアクションの実行を担当するクラス
