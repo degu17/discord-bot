@@ -22,7 +22,7 @@ export class GameManager {
 
     const gameId = this.generateGameId();
     const answer = this.generateAnswer();
-    
+
     const gameState: GameState = {
       id: gameId,
       channelId,
@@ -31,15 +31,18 @@ export class GameManager {
       attempts: [],
       status: 'recruiting',
       startTime: new Date(),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
 
     this.activeGames.set(gameId, gameState);
 
     // 募集タイムアウトを設定
-    const recruitmentTimeout = setTimeout(() => {
-      this.endGame(gameId, 'timeout');
-    }, gameSettings.recruitmentTimeMinutes * 60 * 1000);
+    const recruitmentTimeout = setTimeout(
+      () => {
+        this.endGame(gameId, 'timeout');
+      },
+      gameSettings.recruitmentTimeMinutes * 60 * 1000
+    );
 
     this.gameTimeouts.set(gameId, recruitmentTimeout);
 
@@ -47,9 +50,12 @@ export class GameManager {
     return gameId;
   }
 
-  addParticipant(gameId: string, userId: string): { success: boolean; message: string } {
+  addParticipant(
+    gameId: string,
+    userId: string
+  ): { success: boolean; message: string } {
     const game = this.activeGames.get(gameId);
-    
+
     if (!game) {
       return { success: false, message: 'ゲームが見つかりません。' };
     }
@@ -75,7 +81,7 @@ export class GameManager {
 
   startGame(gameId: string): { success: boolean; message: string } {
     const game = this.activeGames.get(gameId);
-    
+
     if (!game) {
       return { success: false, message: 'ゲームが見つかりません。' };
     }
@@ -97,25 +103,34 @@ export class GameManager {
       clearTimeout(recruitmentTimeout);
     }
 
-    const gameTimeout = setTimeout(() => {
-      this.endGame(gameId, 'timeout');
-    }, gameSettings.timeoutMinutes * 60 * 1000);
+    const gameTimeout = setTimeout(
+      () => {
+        this.endGame(gameId, 'timeout');
+      },
+      gameSettings.timeoutMinutes * 60 * 1000
+    );
 
     this.gameTimeouts.set(gameId, gameTimeout);
 
-    console.log(`🚀 Game ${gameId} started with ${game.participants.length} participants`);
+    console.log(
+      `🚀 Game ${gameId} started with ${game.participants.length} participants`
+    );
     return { success: true, message: 'ゲームが開始されました！' };
   }
 
-  submitGuess(gameId: string, userId: string, guess: string): { 
-    success: boolean; 
-    hit?: number; 
-    blow?: number; 
-    isWinner?: boolean; 
-    message: string 
+  submitGuess(
+    gameId: string,
+    userId: string,
+    guess: string
+  ): {
+    success: boolean;
+    hit?: number;
+    blow?: number;
+    isWinner?: boolean;
+    message: string;
   } {
     const game = this.activeGames.get(gameId);
-    
+
     if (!game) {
       return { success: false, message: 'ゲームが見つかりません。' };
     }
@@ -130,36 +145,39 @@ export class GameManager {
 
     // Hit&Blow計算
     const { hit, blow } = this.calculateHitBlow(game.answer, guess);
-    
+
     const attempt: GameAttempt = {
       userId,
       guess,
       hit,
       blow,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     game.attempts.push(attempt);
     game.lastActivity = new Date();
 
     const isWinner = hit === 4;
-    
+
     if (isWinner) {
       this.endGame(gameId, 'winner', userId);
     }
 
     console.log(`🎯 User ${userId} guessed ${guess}: ${hit}H ${blow}B`);
-    
+
     return {
       success: true,
       hit,
       blow,
       isWinner,
-      message: isWinner ? '🎉 正解です！' : `${hit}H ${blow}B`
+      message: isWinner ? '🎉 正解です！' : `${hit}H ${blow}B`,
     };
   }
 
-  private calculateHitBlow(answer: string, guess: string): { hit: number; blow: number } {
+  private calculateHitBlow(
+    answer: string,
+    guess: string
+  ): { hit: number; blow: number } {
     let hit = 0;
     let blow = 0;
 
@@ -175,7 +193,10 @@ export class GameManager {
 
     // Blow計算
     for (let i = 0; i < 4; i++) {
-      if (answerDigits[i] !== guessDigits[i] && answerDigits.includes(guessDigits[i])) {
+      if (
+        answerDigits[i] !== guessDigits[i] &&
+        answerDigits.includes(guessDigits[i])
+      ) {
         blow++;
       }
     }
@@ -183,9 +204,13 @@ export class GameManager {
     return { hit, blow };
   }
 
-  endGame(gameId: string, reason: 'winner' | 'timeout', winnerId?: string): void {
+  endGame(
+    gameId: string,
+    reason: 'winner' | 'timeout',
+    winnerId?: string
+  ): void {
     const game = this.activeGames.get(gameId);
-    
+
     if (!game) {
       console.log(`⚠️ Attempted to end non-existent game: ${gameId}`);
       return;
@@ -207,7 +232,7 @@ export class GameManager {
       totalAttempts: game.attempts.length,
       duration: Date.now() - game.startTime.getTime(),
       participants: [...game.participants],
-      finishedAt: new Date()
+      finishedAt: new Date(),
     };
 
     this.gameHistory.push(history);
@@ -215,25 +240,27 @@ export class GameManager {
     // アクティブゲームから削除
     this.activeGames.delete(gameId);
 
-    console.log(`🏁 Game ${gameId} ended (${reason}), winner: ${winnerId || 'none'}`);
+    console.log(
+      `🏁 Game ${gameId} ended (${reason}), winner: ${winnerId || 'none'}`
+    );
   }
 
   private endGameIfExists(channelId: string): void {
-    for (const [gameId, game] of this.activeGames.entries()) {
+    this.activeGames.forEach((game, gameId) => {
       if (game.channelId === channelId) {
         this.endGame(gameId, 'timeout');
-        break;
       }
-    }
+    });
   }
 
   getActiveGameByChannel(channelId: string): GameState | null {
-    for (const game of this.activeGames.values()) {
-      if (game.channelId === channelId) {
-        return game;
+    let foundGame: GameState | null = null;
+    this.activeGames.forEach((game) => {
+      if (game.channelId === channelId && !foundGame) {
+        foundGame = game;
       }
-    }
-    return null;
+    });
+    return foundGame;
   }
 
   getGame(gameId: string): GameState | null {
@@ -252,19 +279,26 @@ export class GameManager {
     averageAttempts: number;
     bestScore: number;
   } {
-    const playerGames = this.gameHistory.filter(h => h.participants.includes(userId));
-    const wins = this.gameHistory.filter(h => h.winner === userId);
-    
-    const totalAttempts = playerGames.reduce((sum, game) => sum + game.totalAttempts, 0);
-    const averageAttempts = playerGames.length > 0 ? totalAttempts / playerGames.length : 0;
-    
-    const bestScore = wins.length > 0 ? Math.min(...wins.map(w => w.totalAttempts)) : 0;
+    const playerGames = this.gameHistory.filter((h) =>
+      h.participants.includes(userId)
+    );
+    const wins = this.gameHistory.filter((h) => h.winner === userId);
+
+    const totalAttempts = playerGames.reduce(
+      (sum, game) => sum + game.totalAttempts,
+      0
+    );
+    const averageAttempts =
+      playerGames.length > 0 ? totalAttempts / playerGames.length : 0;
+
+    const bestScore =
+      wins.length > 0 ? Math.min(...wins.map((w) => w.totalAttempts)) : 0;
 
     return {
       totalGames: playerGames.length,
       wins: wins.length,
       averageAttempts: Math.round(averageAttempts * 10) / 10,
-      bestScore
+      bestScore,
     };
   }
 
@@ -275,13 +309,13 @@ export class GameManager {
   private generateAnswer(): string {
     const digits = [];
     const available = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    
+
     // 重複なし4桁数字生成
     for (let i = 0; i < 4; i++) {
       const randomIndex = Math.floor(Math.random() * available.length);
       digits.push(available.splice(randomIndex, 1)[0]);
     }
-    
+
     return digits.join('');
   }
 

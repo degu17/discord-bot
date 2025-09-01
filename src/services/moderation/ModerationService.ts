@@ -1,10 +1,10 @@
 import { Message, User } from 'discord.js';
-import { 
-  IModerationService, 
-  DetectionResult, 
-  ModerationAction, 
+import {
+  IModerationService,
+  DetectionResult,
+  ModerationAction,
   LogEntry,
-  ModerationSettings 
+  ModerationSettings,
 } from '../../types/moderation';
 import { ConfigManager } from '../../utils/ConfigManager';
 import { WordDetector } from './WordDetector';
@@ -70,8 +70,10 @@ export class ModerationService implements IModerationService {
    */
   public async processMessage(message: Message): Promise<void> {
     try {
-      console.log(`📨 Processing message: "${message.content}" from ${message.author.tag}`);
-      
+      console.log(
+        `📨 Processing message: "${message.content}" from ${message.author.tag}`
+      );
+
       // ボット自身のメッセージはスキップ
       if (message.author.bot) {
         console.log('⚠️ Skipping bot message');
@@ -86,12 +88,12 @@ export class ModerationService implements IModerationService {
 
       // メッセージIDを記録（重複処理防止）
       this.processedMessages.add(message.id);
-      
+
       // 古いメッセージIDを定期的にクリーンアップ（メモリリーク防止）
       if (this.processedMessages.size > 1000) {
         const messagesToKeep = Array.from(this.processedMessages).slice(-500);
         this.processedMessages.clear();
-        messagesToKeep.forEach(id => this.processedMessages.add(id));
+        messagesToKeep.forEach((id) => this.processedMessages.add(id));
       }
 
       // 除外対象ユーザーのチェック
@@ -109,16 +111,18 @@ export class ModerationService implements IModerationService {
       // メッセージ内容の検出
       const detectionResult = this.getDetectionResult(message.content);
       console.log('🔍 Detection result:', detectionResult);
-      
+
       if (!detectionResult) {
         // 不適切な内容が検出されなかった場合は何もしない
         return;
       }
 
-      console.log(`Inappropriate content detected: Level ${detectionResult.level}, Words: ${detectionResult.detectedWords.join(', ')}`);
+      console.log(
+        `Inappropriate content detected: Level ${detectionResult.level}, Words: ${detectionResult.detectedWords.join(', ')}`
+      );
 
       // ログエントリの準備
-      let logEntry: LogEntry = {
+      const logEntry: LogEntry = {
         timestamp: new Date(),
         userId: message.author.id,
         username: message.author.tag,
@@ -132,24 +136,25 @@ export class ModerationService implements IModerationService {
       try {
         // アクションを実行
         await this.executeAction(message, detectionResult);
-        
+
         // 成功時のログエントリを更新
         logEntry.success = true;
-        
       } catch (actionError) {
         console.error('Failed to execute moderation action:', actionError);
-        
+
         // 失敗時のログエントリを更新
         logEntry.success = false;
-        logEntry.error = actionError instanceof Error ? actionError.message : String(actionError);
+        logEntry.error =
+          actionError instanceof Error
+            ? actionError.message
+            : String(actionError);
       }
 
       // ログに記録
       await this.moderationLogger.logAction(logEntry);
-
     } catch (error) {
       console.error('Error processing message for moderation:', error);
-      
+
       // 処理エラーの場合もログに記録
       const errorLogEntry: LogEntry = {
         timestamp: new Date(),
@@ -183,7 +188,7 @@ export class ModerationService implements IModerationService {
     // ここでは構造の示唆のみ
     // const member = guild.members.cache.get(user.id);
     // return member?.roles.cache.some(role => this.settings.exemptRoles.includes(role.id)) || false;
-    
+
     return false;
   }
 
@@ -213,21 +218,37 @@ export class ModerationService implements IModerationService {
   /**
    * 検出結果に基づいてアクションを実行する
    */
-  private async executeAction(message: Message, detectionResult: DetectionResult): Promise<void> {
+  private async executeAction(
+    message: Message,
+    detectionResult: DetectionResult
+  ): Promise<void> {
     switch (detectionResult.action) {
       case ModerationAction.WARN:
-        await this.actionExecutor.executeWarning(message, detectionResult.detectedWords);
+        await this.actionExecutor.executeWarning(
+          message,
+          detectionResult.detectedWords
+        );
         break;
-        
+
       case ModerationAction.DELETE:
-        await this.actionExecutor.executeDelete(message, detectionResult.detectedWords);
+        await this.actionExecutor.executeDelete(
+          message,
+          detectionResult.detectedWords
+        );
         break;
-        
+
       case ModerationAction.TIMEOUT:
-        const duration = detectionResult.timeoutDuration || this.settings?.defaultTimeoutDuration || 600000; // 10分
-        await this.actionExecutor.executeTimeout(message, detectionResult.detectedWords, duration);
+        const duration =
+          detectionResult.timeoutDuration ||
+          this.settings?.defaultTimeoutDuration ||
+          600000; // 10分
+        await this.actionExecutor.executeTimeout(
+          message,
+          detectionResult.detectedWords,
+          duration
+        );
         break;
-        
+
       default:
         console.warn(`Unknown moderation action: ${detectionResult.action}`);
         break;
@@ -298,7 +319,7 @@ export class ModerationService implements IModerationService {
   } {
     const detectionResult = this.getDetectionResult(content);
     const details = this.wordDetector.getDetectionDetails(content);
-    
+
     return {
       detectionResult,
       details,
@@ -311,7 +332,9 @@ export class ModerationService implements IModerationService {
   public async cleanupLogs(daysToKeep: number = 30): Promise<void> {
     try {
       await this.moderationLogger.cleanupOldLogs(daysToKeep);
-      console.log(`Log cleanup completed. Kept logs from last ${daysToKeep} days.`);
+      console.log(
+        `Log cleanup completed. Kept logs from last ${daysToKeep} days.`
+      );
     } catch (error) {
       console.error('Failed to cleanup logs:', error);
     }
@@ -355,7 +378,7 @@ export class ModerationService implements IModerationService {
         status,
         components,
         ...(unhealthyComponents.length > 0 && {
-          details: `Unhealthy components: ${unhealthyComponents.join(', ')}`
+          details: `Unhealthy components: ${unhealthyComponents.join(', ')}`,
         }),
       };
     } catch (error) {

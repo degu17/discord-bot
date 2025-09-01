@@ -54,9 +54,9 @@ export class DiscordBot {
     this.client.once(Events.ClientReady, async (readyClient) => {
       console.log(`✅ Bot is ready! Logged in as ${readyClient.user.tag}`);
       console.log(`🆔 Client ID: ${readyClient.user.id}`);
-      console.log(`📱 Bot is online and ready to receive commands`);
-      console.log(`🔍 DEBUG: Setting up message event handler...`);
-      
+      console.log('📱 Bot is online and ready to receive commands');
+      console.log('🔍 DEBUG: Setting up message event handler...');
+
       // モデレーションサービスを初期化
       try {
         await this.moderationService.initialize();
@@ -71,23 +71,29 @@ export class DiscordBot {
           process.env.DISCORD_TOKEN!,
           process.env.DISCORD_CLIENT_ID!
         );
-        
+
         const commands = CommandRegistry.getAllCommands();
-        console.log('📋 Registering commands:', commands.map(c => c.name));
+        console.log(
+          '📋 Registering commands:',
+          commands.map((c) => c.name)
+        );
         await commandRegistry.registerCommands(commands);
         console.log('✅ Slash commands registered successfully');
       } catch (error) {
         console.error('❌ Failed to register commands:', error);
       }
-      
+
       // 権限チェック実行
       console.log('\n🔍 Starting permission check...');
       try {
         await PermissionChecker.checkBotPermissions(readyClient);
-        const hasPermissions = await PermissionChecker.quickPermissionTest(readyClient);
-        
+        const hasPermissions =
+          await PermissionChecker.quickPermissionTest(readyClient);
+
         if (hasPermissions) {
-          console.log('✅ モデレーション機能準備完了: メッセージ管理・タイムアウト権限を確認しました');
+          console.log(
+            '✅ モデレーション機能準備完了: メッセージ管理・タイムアウト権限を確認しました'
+          );
         } else {
           console.log('⚠️ モデレーション権限が不足している可能性があります');
         }
@@ -97,8 +103,10 @@ export class DiscordBot {
     });
 
     this.client.on(Events.MessageCreate, async (message) => {
-      console.log(`🔍 DEBUG: Message event received! Author: ${message.author.tag}, Bot: ${message.author.bot}, Content: "${message.content}"`);
-      
+      console.log(
+        `🔍 DEBUG: Message event received! Author: ${message.author.tag}, Bot: ${message.author.bot}, Content: "${message.content}"`
+      );
+
       if (message.author.bot) {
         console.log('⏭️ DEBUG: Skipping bot message');
         return;
@@ -106,7 +114,9 @@ export class DiscordBot {
 
       // モデレーション処理を実行（1回のみ）
       try {
-        console.log(`🎯 Processing message once: "${message.content}" from ${message.author.tag}`);
+        console.log(
+          `🎯 Processing message once: "${message.content}" from ${message.author.tag}`
+        );
         await this.moderationService.processMessage(message);
       } catch (error) {
         console.error('Error in moderation processing:', error);
@@ -122,7 +132,7 @@ export class DiscordBot {
 
           if (commandName === 'hitblow') {
             const subcommand = interaction.options.getSubcommand();
-            
+
             switch (subcommand) {
               case 'start':
                 await HitBlowCommand.handleStart(interaction);
@@ -139,13 +149,13 @@ export class DiscordBot {
               default:
                 await interaction.reply({
                   content: '❌ 不明なサブコマンドです。',
-                  flags: MessageFlags.Ephemeral
+                  flags: MessageFlags.Ephemeral,
                 });
             }
           } else if (commandName === 'task') {
             const subcommandGroup = interaction.options.getSubcommandGroup();
             const subcommand = interaction.options.getSubcommand();
-            
+
             if (subcommand === 'create') {
               await TaskCommand.handleCreate(interaction);
             } else if (subcommandGroup === 'update') {
@@ -167,13 +177,13 @@ export class DiscordBot {
             } else {
               await interaction.reply({
                 content: '❌ 不明なサブコマンドです。',
-                flags: MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral,
               });
             }
           } else if (commandName === 'modtest') {
             console.log('modtest command received');
             const subcommand = interaction.options.getSubcommand();
-            
+
             switch (subcommand) {
               case 'permissions':
                 await ModTestCommand.handlePermissions(interaction);
@@ -184,14 +194,14 @@ export class DiscordBot {
               default:
                 await interaction.reply({
                   content: '❌ 不明なサブコマンドです。',
-                  flags: MessageFlags.Ephemeral
+                  flags: MessageFlags.Ephemeral,
                 });
             }
           } else {
             console.log(`Unknown command: ${commandName}`);
             await interaction.reply({
               content: `❌ 不明なコマンドです: ${commandName}`,
-              flags: MessageFlags.Ephemeral
+              flags: MessageFlags.Ephemeral,
             });
           }
         }
@@ -210,20 +220,24 @@ export class DiscordBot {
             if (!game) {
               await interaction.reply({
                 content: '❌ ゲームが見つかりません。',
-                flags: MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral,
               });
               return;
             }
 
             const result = gameManager.addParticipant(gameId, userId);
-            
+
             await interaction.reply({
-              content: result.success ? `🎮 ${result.message}` : `❌ ${result.message}`,
-              flags: MessageFlags.Ephemeral
+              content: result.success
+                ? `🎮 ${result.message}`
+                : `❌ ${result.message}`,
+              flags: MessageFlags.Ephemeral,
             });
 
             if (result.success) {
-              console.log(`👤 ${interaction.user.tag} joined game ${gameId} via button`);
+              console.log(
+                `👤 ${interaction.user.tag} joined game ${gameId} via button`
+              );
             }
           } else if (customId.startsWith('hitblow_start_')) {
             const gameId = customId.replace('hitblow_start_', '');
@@ -235,55 +249,65 @@ export class DiscordBot {
             if (!game) {
               await interaction.reply({
                 content: '❌ ゲームが見つかりません。',
-                flags: MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral,
               });
               return;
             }
 
             const result = gameManager.startGame(gameId);
-            
+
             if (result.success) {
               const { EmbedBuilder } = await import('discord.js');
-              
+
               const embed = new EmbedBuilder()
                 .setTitle('🚀 ゲーム開始！')
-                .setDescription(`参加者: ${game.participants.length}人\n\n4桁の数字を予想して \`/hitblow send\` コマンドで送信してください！`)
+                .setDescription(
+                  `参加者: ${game.participants.length}人\n\n4桁の数字を予想して \`/hitblow send\` コマンドで送信してください！`
+                )
                 .addFields(
                   { name: '制限時間', value: '⏰ 5分', inline: true },
-                  { name: '参加者数', value: `👥 ${game.participants.length}人`, inline: true }
+                  {
+                    name: '参加者数',
+                    value: `👥 ${game.participants.length}人`,
+                    inline: true,
+                  }
                 )
-                .setColor(0x00FF00)
+                .setColor(0x00ff00)
                 .setTimestamp();
 
               await interaction.reply({
-                embeds: [embed]
+                embeds: [embed],
               });
 
-              console.log(`🚀 Game ${gameId} started by ${interaction.user.tag}`);
+              console.log(
+                `🚀 Game ${gameId} started by ${interaction.user.tag}`
+              );
             } else {
               await interaction.reply({
                 content: `❌ ${result.message}`,
-                flags: MessageFlags.Ephemeral
+                flags: MessageFlags.Ephemeral,
               });
             }
           }
         }
       } catch (error) {
         console.error('Interaction handling error:', error);
-        
+
         // インタラクションが既に応答済みかチェック
         if (interaction.isChatInputCommand() || interaction.isButton()) {
           // 既に応答済みの場合は何もしない（ログのみ出力）
           if (interaction.replied || interaction.deferred) {
-            console.log('Interaction already responded, skipping error response');
+            console.log(
+              'Interaction already responded, skipping error response'
+            );
             return;
           }
-          
+
           // 未応答の場合のみエラーメッセージを送信
           try {
             await interaction.reply({
               content: '❌ 処理中にエラーが発生しました。',
-              flags: MessageFlags.Ephemeral
+              flags: MessageFlags.Ephemeral,
             });
           } catch (replyError) {
             console.error('Reply error:', replyError);
@@ -294,9 +318,15 @@ export class DiscordBot {
 
     // イベントハンドラーの登録確認
     console.log('📋 Event handlers registered:');
-    console.log(`  - ClientReady: ${this.client.listenerCount(Events.ClientReady)} listeners`);
-    console.log(`  - MessageCreate: ${this.client.listenerCount(Events.MessageCreate)} listeners`);
-    console.log(`  - InteractionCreate: ${this.client.listenerCount(Events.InteractionCreate)} listeners`);
+    console.log(
+      `  - ClientReady: ${this.client.listenerCount(Events.ClientReady)} listeners`
+    );
+    console.log(
+      `  - MessageCreate: ${this.client.listenerCount(Events.MessageCreate)} listeners`
+    );
+    console.log(
+      `  - InteractionCreate: ${this.client.listenerCount(Events.InteractionCreate)} listeners`
+    );
   }
 
   public async start(token: string): Promise<void> {

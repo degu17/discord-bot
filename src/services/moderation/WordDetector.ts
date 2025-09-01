@@ -1,4 +1,10 @@
-import { IWordDetector, DetectionResult, ModerationRules, ModerationRule, ModerationAction } from '../../types/moderation';
+import {
+  IWordDetector,
+  DetectionResult,
+  ModerationRules,
+  ModerationRule,
+  ModerationAction,
+} from '../../types/moderation';
 import { ConfigManager } from '../../utils/ConfigManager';
 
 /**
@@ -17,7 +23,7 @@ export class WordDetector implements IWordDetector {
    */
   public detectInappropriateContent(content: string): DetectionResult | null {
     console.log(`🔍 Detecting inappropriate content in: "${content}"`);
-    
+
     if (!content || typeof content !== 'string') {
       console.log('⚠️ Content is empty or not a string');
       return null;
@@ -33,11 +39,18 @@ export class WordDetector implements IWordDetector {
 
     // 各ルールに対してチェック
     for (const rule of this.rules) {
-      console.log(`🔎 Checking rule level ${rule.level} with words: [${rule.words.join(', ')}]`);
-      const detectedWords = this.checkWordsInContent(normalizedContent, rule.words);
-      
+      console.log(
+        `🔎 Checking rule level ${rule.level} with words: [${rule.words.join(', ')}]`
+      );
+      const detectedWords = this.checkWordsInContent(
+        normalizedContent,
+        rule.words
+      );
+
       if (detectedWords.length > 0) {
-        console.log(`⚠️ Detected inappropriate words: [${detectedWords.join(', ')}]`);
+        console.log(
+          `⚠️ Detected inappropriate words: [${detectedWords.join(', ')}]`
+        );
         const detection: DetectionResult = {
           level: rule.level,
           detectedWords,
@@ -69,7 +82,7 @@ export class WordDetector implements IWordDetector {
 
     for (const word of words) {
       const normalizedWord = word.toLowerCase().trim();
-      
+
       if (normalizedWord === '') {
         continue;
       }
@@ -100,18 +113,19 @@ export class WordDetector implements IWordDetector {
     try {
       const config = await this.configManager.loadModerationRules();
       this.rules = config.rules || [];
-      
+
       console.log(`📋 Loaded ${this.rules.length} moderation rules:`);
       this.rules.forEach((rule, index) => {
-        console.log(`  ${index + 1}. Level ${rule.level}: ${rule.words.join(', ')} -> ${rule.action}`);
+        console.log(
+          `  ${index + 1}. Level ${rule.level}: ${rule.words.join(', ')} -> ${rule.action}`
+        );
       });
-      
+
       // ルールをレベル順でソート（高いレベルが優先されるように）
       this.rules.sort((a, b) => b.level - a.level);
-      
     } catch (error) {
       console.error('Error loading moderation rules:', error);
-      
+
       // エラーが発生した場合はデフォルトルールを使用
       this.rules = this.getDefaultRules();
       console.log('Using default moderation rules due to loading error.');
@@ -156,7 +170,7 @@ export class WordDetector implements IWordDetector {
    * 特定のレベルのルールを取得する
    */
   public getRulesByLevel(level: number): ModerationRule[] {
-    return this.rules.filter(rule => rule.level === level);
+    return this.rules.filter((rule) => rule.level === level);
   }
 
   /**
@@ -179,7 +193,10 @@ export class WordDetector implements IWordDetector {
     const detectionsByLevel: { [level: number]: string[] } = {};
 
     for (const rule of this.rules) {
-      const detectedWords = this.checkWordsInContent(normalizedContent, rule.words);
+      const detectedWords = this.checkWordsInContent(
+        normalizedContent,
+        rule.words
+      );
       if (detectedWords.length > 0) {
         detectionsByLevel[rule.level] = detectedWords;
       }
