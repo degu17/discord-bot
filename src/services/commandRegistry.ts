@@ -14,12 +14,14 @@ export class CommandRegistry {
     try {
       console.log('🔄 Started refreshing application (/) commands.');
 
-      const data = await this.rest.put(
+      const data = (await this.rest.put(
         Routes.applicationCommands(this.clientId),
         { body: commands }
-      ) as CommandData[];
+      )) as CommandData[];
 
-      console.log(`✅ Successfully reloaded ${data.length} application (/) commands.`);
+      console.log(
+        `✅ Successfully reloaded ${data.length} application (/) commands.`
+      );
       return data;
     } catch (error) {
       console.error('❌ Error registering commands:', error);
@@ -36,12 +38,12 @@ export class CommandRegistry {
           {
             name: 'start',
             description: 'ゲームを開始して参加者を募集',
-            type: 1 // SUB_COMMAND
+            type: 1, // SUB_COMMAND
           },
           {
             name: 'join',
             description: 'ゲームに参加',
-            type: 1 // SUB_COMMAND
+            type: 1, // SUB_COMMAND
           },
           {
             name: 'send',
@@ -52,17 +54,17 @@ export class CommandRegistry {
                 name: 'number',
                 description: '4桁の数字を入力',
                 type: 3, // STRING
-                required: true
-              }
-            ]
+                required: true,
+              },
+            ],
           },
           {
             name: 'history',
             description: '過去のゲーム履歴を表示',
-            type: 1 // SUB_COMMAND
-          }
-        ]
-      }
+            type: 1, // SUB_COMMAND
+          },
+        ],
+      },
     ];
   }
 
@@ -81,7 +83,7 @@ export class CommandRegistry {
                 name: 'title',
                 description: 'タスクのタイトル',
                 type: 3, // STRING
-                required: true
+                required: true,
               },
               {
                 name: 'priority',
@@ -91,16 +93,16 @@ export class CommandRegistry {
                 choices: [
                   { name: '高', value: 'high' },
                   { name: '中', value: 'medium' },
-                  { name: '低', value: 'low' }
-                ]
+                  { name: '低', value: 'low' },
+                ],
               },
               {
                 name: 'deadline',
                 description: '期限 (YYYY-MM-DD形式)',
                 type: 3, // STRING
-                required: false
-              }
-            ]
+                required: false,
+              },
+            ],
           },
           {
             name: 'update',
@@ -116,15 +118,15 @@ export class CommandRegistry {
                     name: 'current_title',
                     description: '現在のタスクタイトル',
                     type: 3, // STRING
-                    required: true
+                    required: true,
                   },
                   {
                     name: 'new_title',
                     description: '新しいタスクタイトル',
                     type: 3, // STRING
-                    required: true
-                  }
-                ]
+                    required: true,
+                  },
+                ],
               },
               {
                 name: 'priority',
@@ -135,7 +137,7 @@ export class CommandRegistry {
                     name: 'title',
                     description: 'タスクタイトル',
                     type: 3, // STRING
-                    required: true
+                    required: true,
                   },
                   {
                     name: 'priority',
@@ -145,10 +147,10 @@ export class CommandRegistry {
                     choices: [
                       { name: '高', value: 'high' },
                       { name: '中', value: 'medium' },
-                      { name: '低', value: 'low' }
-                    ]
-                  }
-                ]
+                      { name: '低', value: 'low' },
+                    ],
+                  },
+                ],
               },
               {
                 name: 'deadline',
@@ -159,17 +161,17 @@ export class CommandRegistry {
                     name: 'title',
                     description: 'タスクタイトル',
                     type: 3, // STRING
-                    required: true
+                    required: true,
                   },
                   {
                     name: 'deadline',
                     description: '新しい期限 (YYYY-MM-DD形式)',
                     type: 3, // STRING
-                    required: true
-                  }
-                ]
-              }
-            ]
+                    required: true,
+                  },
+                ],
+              },
+            ],
           },
           {
             name: 'delete',
@@ -180,9 +182,9 @@ export class CommandRegistry {
                 name: 'title',
                 description: '削除するタスクのタイトル',
                 type: 3, // STRING
-                required: true
-              }
-            ]
+                required: true,
+              },
+            ],
           },
           {
             name: 'confirm',
@@ -193,12 +195,12 @@ export class CommandRegistry {
                 name: 'title',
                 description: '確認するタスクのタイトル',
                 type: 3, // STRING
-                required: true
-              }
-            ]
-          }
-        ]
-      }
+                required: true,
+              },
+            ],
+          },
+        ],
+      },
     ];
   }
 
@@ -211,15 +213,15 @@ export class CommandRegistry {
           {
             name: 'permissions',
             description: 'ボットの権限をチェックします',
-            type: 1 // SUB_COMMAND
+            type: 1, // SUB_COMMAND
           },
           {
             name: 'channel',
             description: '現在のチャンネルでの権限をチェックします',
-            type: 1 // SUB_COMMAND
-          }
-        ]
-      }
+            type: 1, // SUB_COMMAND
+          },
+        ],
+      },
     ];
   }
 
@@ -227,7 +229,7 @@ export class CommandRegistry {
     return [
       ...CommandRegistry.createHitBlowCommands(),
       ...CommandRegistry.createTaskCommands(),
-      ...CommandRegistry.createModTestCommands()
+      ...CommandRegistry.createModTestCommands(),
     ];
   }
 }

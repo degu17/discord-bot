@@ -1,7 +1,10 @@
 import { GameAttempt } from '../types';
 
 export class GameLogic {
-  static calculateHitBlow(answer: string, guess: string): { hit: number; blow: number } {
+  static calculateHitBlow(
+    answer: string,
+    guess: string
+  ): { hit: number; blow: number } {
     if (answer.length !== 4 || guess.length !== 4) {
       throw new Error('Both answer and guess must be 4 digits');
     }
@@ -11,7 +14,7 @@ export class GameLogic {
 
     const answerDigits = answer.split('');
     const guessDigits = guess.split('');
-    
+
     // まずHitを計算
     const answerRemaining: string[] = [];
     const guessRemaining: string[] = [];
@@ -40,25 +43,28 @@ export class GameLogic {
   static generateUniqueAnswer(): string {
     const digits: number[] = [];
     const available = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    
+
     // 重複なし4桁数字生成
     for (let i = 0; i < 4; i++) {
       const randomIndex = Math.floor(Math.random() * available.length);
       digits.push(available.splice(randomIndex, 1)[0]);
     }
-    
+
     return digits.join('');
   }
 
-  static validateGuess(guess: string, allowDuplicates: boolean = false): { 
-    isValid: boolean; 
-    error?: string 
+  static validateGuess(
+    guess: string,
+    allowDuplicates: boolean = false
+  ): {
+    isValid: boolean;
+    error?: string;
   } {
     // 4桁の数字チェック
     if (!/^\d{4}$/.test(guess)) {
       return {
         isValid: false,
-        error: '4桁の数字を入力してください。'
+        error: '4桁の数字を入力してください。',
       };
     }
 
@@ -66,11 +72,11 @@ export class GameLogic {
     if (!allowDuplicates) {
       const digits = guess.split('');
       const uniqueDigits = new Set(digits);
-      
+
       if (uniqueDigits.size !== digits.length) {
         return {
           isValid: false,
-          error: '重複する数字は使用できません。'
+          error: '重複する数字は使用できません。',
         };
       }
     }
@@ -85,28 +91,35 @@ export class GameLogic {
 
     return attempts
       .map((attempt, index) => {
-        const time = attempt.timestamp.toLocaleTimeString('ja-JP', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        const time = attempt.timestamp.toLocaleTimeString('ja-JP', {
+          hour: '2-digit',
+          minute: '2-digit',
         });
         return `${index + 1}. ${attempt.guess} → ${attempt.hit}H ${attempt.blow}B (${time})`;
       })
       .join('\n');
   }
 
-  static calculateGameScore(attempts: number, participants: number, duration: number): number {
+  static calculateGameScore(
+    attempts: number,
+    participants: number,
+    duration: number
+  ): number {
     // スコア計算式: 基本点 - 試行回数ペナルティ + 参加者ボーナス - 時間ペナルティ
     const baseScore = 1000;
     const attemptPenalty = attempts * 50;
     const participantBonus = Math.min(participants * 10, 100);
     const timePenalty = Math.floor(duration / (60 * 1000)) * 5; // 1分ごとに5点減点
 
-    return Math.max(0, baseScore - attemptPenalty + participantBonus - timePenalty);
+    return Math.max(
+      0,
+      baseScore - attemptPenalty + participantBonus - timePenalty
+    );
   }
 
   static getGameDifficulty(answer: string): 'easy' | 'medium' | 'hard' {
     const digits = answer.split('').map(Number);
-    
+
     // 連続した数字が多いほど簡単
     let consecutiveCount = 0;
     for (let i = 0; i < digits.length - 1; i++) {
@@ -117,7 +130,7 @@ export class GameLogic {
 
     // 0が含まれると少し難しい
     const hasZero = digits.includes(0);
-    
+
     if (consecutiveCount >= 2) {
       return 'easy';
     } else if (consecutiveCount === 1 && !hasZero) {
@@ -133,28 +146,28 @@ export class GameLogic {
     }
 
     const usedDigits = new Set(
-      attempts.flatMap(attempt => attempt.guess.split(''))
+      attempts.flatMap((attempt) => attempt.guess.split(''))
     );
 
     // まだ試していない数字があればヒント
-    const unusedDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-      .filter(d => !usedDigits.has(d.toString()));
+    const unusedDigits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
+      (d) => !usedDigits.has(d.toString())
+    );
 
     if (unusedDigits.length > 0) {
       return `ヒント: まだ試していない数字があります (残り${unusedDigits.length}個)`;
     }
 
     // 位置のヒント
-    const correctPositions = attempts
-      .flatMap(attempt => {
-        const positions: number[] = [];
-        for (let i = 0; i < 4; i++) {
-          if (attempt.guess[i] === answer[i]) {
-            positions.push(i + 1);
-          }
+    const correctPositions = attempts.flatMap((attempt) => {
+      const positions: number[] = [];
+      for (let i = 0; i < 4; i++) {
+        if (attempt.guess[i] === answer[i]) {
+          positions.push(i + 1);
         }
-        return positions;
-      });
+      }
+      return positions;
+    });
 
     if (correctPositions.length > 0) {
       const uniquePositions = [...new Set(correctPositions)];
@@ -174,7 +187,7 @@ export class GameLogic {
     }
 
     const lastAttempt = attempts[attempts.length - 1];
-    
+
     if (lastAttempt.hit === 0 && lastAttempt.blow === 0) {
       return '前回の数字はすべて不正解です。まったく違う数字を試してみてください。';
     }

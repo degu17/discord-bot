@@ -42,7 +42,7 @@ export class NotionClient {
 
   async createTask(request: TaskCreateRequest, creator: string): Promise<Task> {
     this.initialize();
-    
+
     try {
       const response = await this.notion!.pages.create({
         parent: { database_id: this.databaseId! },
@@ -51,38 +51,38 @@ export class NotionClient {
             title: [
               {
                 text: {
-                  content: request.title
-                }
-              }
-            ]
+                  content: request.title,
+                },
+              },
+            ],
           },
-          'Priority': {
+          Priority: {
             select: {
-              name: this.mapPriorityToNotion(request.priority || 'medium')
-            }
+              name: this.mapPriorityToNotion(request.priority || 'medium'),
+            },
           },
           ...(request.deadline && {
             'Due date': {
               date: {
-                start: request.deadline.toISOString().split('T')[0]
-              }
-            }
+                start: request.deadline.toISOString().split('T')[0],
+              },
+            },
           }),
-          'Description': {
+          Description: {
             rich_text: [
               {
                 text: {
-                  content: `作成者: ${creator}`
-                }
-              }
-            ]
+                  content: `作成者: ${creator}`,
+                },
+              },
+            ],
           },
-          'Status': {
+          Status: {
             status: {
-              name: '未着手'
-            }
-          }
-        }
+              name: '未着手',
+            },
+          },
+        },
       });
 
       return this.mapNotionPageToTask(response);
@@ -92,9 +92,12 @@ export class NotionClient {
     }
   }
 
-  async updateTask(title: string, updates: TaskUpdateRequest): Promise<Task | null> {
+  async updateTask(
+    title: string,
+    updates: TaskUpdateRequest
+  ): Promise<Task | null> {
     this.initialize();
-    
+
     try {
       // タイトルでタスクを検索
       const existingTask = await this.findTaskByTitle(title);
@@ -111,40 +114,40 @@ export class NotionClient {
           title: [
             {
               text: {
-                content: updates.title
-              }
-            }
-          ]
+                content: updates.title,
+              },
+            },
+          ],
         };
       }
 
       if (updates.priority) {
         properties['Priority'] = {
           select: {
-            name: this.mapPriorityToNotion(updates.priority)
-          }
+            name: this.mapPriorityToNotion(updates.priority),
+          },
         };
       }
 
       if (updates.deadline) {
         properties['Due date'] = {
           date: {
-            start: updates.deadline.toISOString().split('T')[0]
-          }
+            start: updates.deadline.toISOString().split('T')[0],
+          },
         };
       }
 
       if (updates.status) {
         properties['Status'] = {
           status: {
-            name: this.mapStatusToNotion(updates.status)
-          }
+            name: this.mapStatusToNotion(updates.status),
+          },
         };
       }
 
       const response = await this.notion!.pages.update({
         page_id: existingTask.id,
-        properties
+        properties,
       });
 
       return this.mapNotionPageToTask(response);
@@ -156,7 +159,7 @@ export class NotionClient {
 
   async deleteTask(title: string): Promise<boolean> {
     this.initialize();
-    
+
     try {
       const existingTask = await this.findTaskByTitle(title);
       if (!existingTask) {
@@ -165,7 +168,7 @@ export class NotionClient {
 
       await this.notion!.pages.update({
         page_id: existingTask.id,
-        archived: true
+        archived: true,
       });
 
       return true;
@@ -177,7 +180,7 @@ export class NotionClient {
 
   async getTask(title: string): Promise<Task | null> {
     this.initialize();
-    
+
     try {
       return await this.findTaskByTitle(title);
     } catch (error) {
@@ -188,14 +191,14 @@ export class NotionClient {
 
   async getAllTasks(): Promise<Task[]> {
     this.initialize();
-    
+
     try {
       const response = await this.notion!.databases.query({
         database_id: this.databaseId!,
-        page_size: 100
+        page_size: 100,
       });
 
-      return response.results.map(page => this.mapNotionPageToTask(page));
+      return response.results.map((page) => this.mapNotionPageToTask(page));
     } catch (error) {
       console.error('Error getting all tasks from Notion:', error);
       throw new Error('タスク一覧の取得に失敗しました');
@@ -208,9 +211,9 @@ export class NotionClient {
       filter: {
         property: 'Task name',
         title: {
-          equals: title
-        }
-      }
+          equals: title,
+        },
+      },
     });
 
     if (response.results.length === 0) {
@@ -228,15 +231,19 @@ export class NotionClient {
 
     const properties = page.properties;
     const deadline = this.extractDate(properties['Due date']);
-    
+
     const task: Task = {
       id: page.id,
       title: this.extractText(properties['Task name']),
-      priority: this.mapNotionToPriority(this.extractSelect(properties.Priority)),
-      creator: this.extractCreatorFromDescription(this.extractText(properties.Description)),
+      priority: this.mapNotionToPriority(
+        this.extractSelect(properties.Priority)
+      ),
+      creator: this.extractCreatorFromDescription(
+        this.extractText(properties.Description)
+      ),
       status: this.mapNotionToStatus(this.extractStatus(properties.Status)),
       createdAt: new Date(page.created_time),
-      updatedAt: new Date(page.last_edited_time)
+      updatedAt: new Date(page.last_edited_time),
     };
 
     if (deadline) {
@@ -268,9 +275,9 @@ export class NotionClient {
 
   private extractText(property: unknown): string {
     if (!property || typeof property !== 'object') return '';
-    
+
     const prop = property as Record<string, unknown>;
-    
+
     if ('title' in prop && Array.isArray(prop.title)) {
       return prop.title.map((t: any) => t?.text?.content || '').join('');
     }
@@ -282,9 +289,9 @@ export class NotionClient {
 
   private extractSelect(property: unknown): string {
     if (!property || typeof property !== 'object') return '';
-    
+
     const prop = property as Record<string, unknown>;
-    
+
     if ('select' in prop && prop.select && typeof prop.select === 'object') {
       const select = prop.select as Record<string, unknown>;
       return typeof select.name === 'string' ? select.name : '';
@@ -294,9 +301,9 @@ export class NotionClient {
 
   private extractStatus(property: unknown): string {
     if (!property || typeof property !== 'object') return '';
-    
+
     const prop = property as Record<string, unknown>;
-    
+
     if ('status' in prop && prop.status && typeof prop.status === 'object') {
       const status = prop.status as Record<string, unknown>;
       return typeof status.name === 'string' ? status.name : '';
@@ -312,9 +319,9 @@ export class NotionClient {
 
   private extractDate(property: unknown): Date | undefined {
     if (!property || typeof property !== 'object') return undefined;
-    
+
     const prop = property as Record<string, unknown>;
-    
+
     if ('date' in prop && prop.date && typeof prop.date === 'object') {
       const date = prop.date as Record<string, unknown>;
       if (typeof date.start === 'string') {
@@ -326,43 +333,49 @@ export class NotionClient {
 
   private mapPriorityToNotion(priority: 'high' | 'medium' | 'low'): string {
     const map = {
-      'high': 'High',
-      'medium': 'Medium',
-      'low': 'Low'
+      high: 'High',
+      medium: 'Medium',
+      low: 'Low',
     };
     return map[priority];
   }
 
-  private mapNotionToPriority(notionPriority: string): 'high' | 'medium' | 'low' {
+  private mapNotionToPriority(
+    notionPriority: string
+  ): 'high' | 'medium' | 'low' {
     const map: Record<string, 'high' | 'medium' | 'low'> = {
-      'High': 'high',
-      'Medium': 'medium',
-      'Low': 'low'
+      High: 'high',
+      Medium: 'medium',
+      Low: 'low',
     };
     return map[notionPriority] || 'medium';
   }
 
-  private mapStatusToNotion(status: 'not_started' | 'in_progress' | 'completed'): string {
+  private mapStatusToNotion(
+    status: 'not_started' | 'in_progress' | 'completed'
+  ): string {
     const map = {
-      'not_started': '未着手',
-      'in_progress': '進行中',
-      'completed': '完了'
+      not_started: '未着手',
+      in_progress: '進行中',
+      completed: '完了',
     };
     return map[status];
   }
 
-  private mapNotionToStatus(notionStatus: string): 'not_started' | 'in_progress' | 'completed' {
+  private mapNotionToStatus(
+    notionStatus: string
+  ): 'not_started' | 'in_progress' | 'completed' {
     const map: Record<string, 'not_started' | 'in_progress' | 'completed'> = {
-      '未着手': 'not_started',
-      '進行中': 'in_progress',
-      '完了': 'completed'
+      未着手: 'not_started',
+      進行中: 'in_progress',
+      完了: 'completed',
     };
     return map[notionStatus] || 'not_started';
   }
 
   async testConnection(): Promise<boolean> {
     this.initialize();
-    
+
     try {
       await this.notion!.databases.retrieve({ database_id: this.databaseId! });
       return true;

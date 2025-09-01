@@ -14,6 +14,7 @@ export * from './discord';
 
 // モデレーション関連の型定義を再エクスポート
 export * from './moderation';
+import type { ModerationRules } from './moderation';
 
 /**
  * Bot設定を表すインターフェース

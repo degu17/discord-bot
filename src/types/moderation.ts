@@ -99,7 +99,11 @@ export interface IWordDetector {
 export interface IActionExecutor {
   executeWarning(message: Message, detectedWords: string[]): Promise<void>;
   executeDelete(message: Message, detectedWords: string[]): Promise<void>;
-  executeTimeout(message: Message, detectedWords: string[], duration: number): Promise<void>;
+  executeTimeout(
+    message: Message,
+    detectedWords: string[],
+    duration: number
+  ): Promise<void>;
   notifyAdministrators(error: string, context: ActionContext): Promise<void>;
 }
 
